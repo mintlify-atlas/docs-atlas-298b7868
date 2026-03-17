@@ -1,0 +1,60 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "NexPhisher",
+  "projectDescription": "A Bash-based advanced phishing tool with 30+ login page templates and multiple port-forwarding options for Linux and Termux.",
+  "theme": "aspen",
+  "primaryColor": "#848c8e",
+  "lightColor": "#11161e",
+  "darkColor": "#cfd0d2",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Usage",
+            "pages": [
+              "usage/running-the-tool",
+              "usage/phishing-templates",
+              "usage/port-forwarding"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/dependencies",
+              "reference/logs-and-output",
+              "reference/troubleshooting"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "30+ phishing page templates for major platforms (Facebook, Instagram, Google, Netflix, etc.)",
+    "5 port forwarding options: Localhost, Ngrok, Serveo, LocalXpose, LocalHostRun",
+    "Custom subdomain support for Serveo and LocalXpose tunnels",
+    "Real-time credential capture with live display and log file saving",
+    "Victim IP address detection and logging",
+    "Works on Linux and Termux (Android) environments",
+    "Interactive terminal menu with color-coded interface"
+  ],
+  "publicApiSurface": [
+    "bash nexphisher — Launch the interactive phishing tool",
+    "bash setup — Install dependencies on Linux (apt-based)",
+    "bash tmux_setup — Install dependencies on Termux (Android)",
+    "Template options: facebook, instagram, google, microsoft, netflix, paypal, steam, twitter, playstation, github, twitch, pinterest, snapchat, linkedin, ebay, dropbox, protonmail, spotify, reddit, adobe, deviantart, badoo, origin, cryptocoinsniper, yahoo, wordpress, yandex, stackoverflow, vk, xbox",
+    "Tunnel options: localhost (127.0.0.1:5555), ngrok, serveo, localxpose, localhostrun",
+    "Captured credentials saved to logs/<website>.log",
+    "Victim IP addresses saved to ip.txt"
+  ]
+}
