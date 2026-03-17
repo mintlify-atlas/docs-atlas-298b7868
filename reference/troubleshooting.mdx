@@ -1,0 +1,173 @@
+---
+title: "Troubleshooting"
+description: "Solutions to common errors and unexpected behavior in NexPhisher."
+---
+
+<AccordionGroup>
+  <Accordion title='"Packages are not Installed" error on startup'>
+    NexPhisher's `reqs()` function checks for `php`, `curl`, `ssh`, and `unzip` in `PATH` before showing the menu. If any of these are missing, it prints this error and exits.
+
+    **Fix:** Run the setup script for your platform:
+
+    <Tabs>
+      <Tab title="Linux">
+        ```bash
+        bash setup
+        ```
+      </Tab>
+      <Tab title="Termux">
+        ```bash
+        bash tmux_setup
+        ```
+      </Tab>
+    </Tabs>
+
+    After setup completes, run `bash nexphisher` again. If the error persists, verify individual packages:
+
+    ```bash
+    command -v php && command -v curl && command -v ssh && command -v unzip
+    ```
+
+    Any command that prints nothing is missing. Install it manually (see [Dependencies](/reference/dependencies) for the exact package names).
+  </Accordion>
+
+  <Accordion title='"Packages are not Found" error on startup'>
+    This error means `reqs()` found all system packages but one of the required directories — `.htr/` or `.Modules/` — does not exist.
+
+    **Fix:** Re-run the setup script. It creates both directories and re-downloads the ngrok and loclx binaries:
+
+    ```bash
+    bash setup        # Linux
+    bash tmux_setup   # Termux
+    ```
+
+    If the directories still don't appear after setup, check that `Modules.zip` is present in the NexPhisher root directory and that `unzip` is working correctly.
+  </Accordion>
+
+  <Accordion title="Ngrok URL is not generated">
+    After selecting a platform and choosing the Ngrok tunnel option, NexPhisher waits up to 7 seconds for ngrok to start and print a public URL. If no URL appears, one of the following is the cause:
+
+    - **Binary not found:** `.htr/ngrok` does not exist. Re-run `bash setup` to re-download it.
+    - **Binary not executable:** The ngrok binary was downloaded but cannot be executed. Run:
+
+      ```bash
+      chmod +x .htr/ngrok
+      ```
+
+    - **API timeout:** Ngrok's local API did not respond within 7 seconds. This can happen on slow connections or when ngrok itself is rate-limiting new tunnel requests. Wait a moment and try again.
+    - **Architecture mismatch:** The wrong binary variant was downloaded. Check your CPU architecture and compare it to what was downloaded (see [Architecture mismatch](#architecture-mismatch) below).
+  </Accordion>
+
+  <Accordion title="Serveo shows as currently down">
+    NexPhisher's source code notes that Serveo is "Currently Down" and may have been removed or disabled as a tunnel option in the tool. This is a known limitation of the project — Serveo has experienced extended outages.
+
+    **Fix:** Use one of the other four tunnel methods: Localhost, Ngrok, LocalXpose, or LocalHostRun.
+  </Accordion>
+
+  <Accordion title="LocalXpose custom subdomain is not available">
+    When using LocalXpose with a custom subdomain, the chosen subdomain name may already be in use by another user on the LocalXpose network.
+
+    **Fix:** Try a different subdomain name. Subdomain availability is not checked before the tunnel starts — if the tunnel fails or does not produce a URL, the name is taken. Choose something less common or append random characters.
+  </Accordion>
+
+  <Accordion title="PHP not found">
+    NexPhisher requires PHP to run the built-in web server. If `command -v php` returns nothing, PHP is not installed.
+
+    <Tabs>
+      <Tab title="Linux">
+        ```bash
+        sudo apt-get update && sudo apt-get install -y php
+        ```
+      </Tab>
+      <Tab title="Termux">
+        ```bash
+        apt update && apt install -y php
+        ```
+      </Tab>
+    </Tabs>
+
+    After installing, verify with:
+
+    ```bash
+    php --version
+    ```
+  </Accordion>
+
+  <Accordion title="SSH not found">
+    SSH is required for Serveo and other SSH-based tunnels. If `command -v ssh` returns nothing, the OpenSSH client is not installed.
+
+    <Tabs>
+      <Tab title="Linux">
+        ```bash
+        sudo apt-get install -y openssh-server
+        ```
+      </Tab>
+      <Tab title="Termux">
+        ```bash
+        apt install -y openssh
+        ```
+      </Tab>
+    </Tabs>
+
+    After installing, verify with:
+
+    ```bash
+    ssh -V
+    ```
+  </Accordion>
+
+  <Accordion title="Credentials are not appearing in the terminal">
+    The polling loop checks for `.htr/www/usernames.txt` every 0.75 seconds. If nothing appears, consider the following:
+
+    - **The victim has not submitted the form.** The IP is logged when the page loads, but credentials are only logged when the victim clicks the fake login button. Wait for form submission.
+    - **The PHP server is not running.** If the server crashed or was killed, incoming requests won't be handled and no files will be written. Stop the session with **Ctrl+C** and start a new one.
+    - **The tunnel is no longer active.** Ngrok and other free-tier services have session time limits. Check whether the public URL is still reachable from an external connection.
+    - **Wrong URL was shared.** Confirm the URL printed in the terminal after tunnel setup is the one that was sent to the victim.
+  </Accordion>
+
+  <Accordion title="Architecture mismatch — wrong binary downloaded" id="architecture-mismatch">
+    The setup script auto-detects the CPU architecture using `uname -m` and downloads either the `arm` or `386` variant of ngrok and loclx. On unusual or 64-bit-only systems this detection may download the wrong binary, causing a "cannot execute binary file" error.
+
+    **To check your architecture:**
+
+    ```bash
+    uname -m
+    ```
+
+    | Output | Expected binary variant |
+    |--------|-------------------------|
+    | `armv7l`, `aarch64` | ARM (`linux-arm`) |
+    | `i386`, `i686` | x86 (`linux-386`) |
+    | `x86_64` | x86 (`linux-386`) via compatibility layer |
+
+    If the wrong binary was downloaded, manually download the correct one and place it at `.htr/ngrok` or `.htr/loclx`:
+
+    ```bash
+    # Example: manually download x86 ngrok
+    curl -Lo /tmp/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.zip
+    unzip -o /tmp/ngrok.zip -d .htr/
+    chmod +x .htr/ngrok
+    ```
+  </Accordion>
+
+  <Accordion title='`bash: ./.htr/ngrok: Permission denied`'>
+    The ngrok (or loclx) binary exists but does not have the executable bit set. This can happen if the file was copied or re-downloaded without preserving permissions.
+
+    **Fix:**
+
+    ```bash
+    chmod +x .htr/ngrok
+    chmod +x .htr/loclx
+    ```
+
+    Then run `bash nexphisher` again.
+  </Accordion>
+</AccordionGroup>
+
+## Still stuck?
+
+If none of the above resolves your issue, check the [NexPhisher GitHub repository](https://github.com/htr-tech/nexphisher) for open issues.
+
+<Note>
+  NexPhisher is no longer actively maintained. The successor project is [ZPhisher](https://github.com/htr-tech/zphisher), which includes updated templates and tunnel support.
+</Note>

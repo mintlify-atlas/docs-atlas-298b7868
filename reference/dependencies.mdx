@@ -1,0 +1,158 @@
+---
+title: "Dependencies"
+description: "All runtime dependencies required by NexPhisher, how to install them, and how to verify that setup completed successfully."
+---
+
+NexPhisher depends on a small set of system packages, two auto-downloaded binaries, and two directories created during setup. All of these are installed or created by running the setup script.
+
+## System packages
+
+The setup scripts install the following packages. Every package must be present in `PATH` for NexPhisher to start.
+
+| Package | Checked as | Purpose |
+|---------|------------|-----------------------------------|
+| `php` | `command -v php` | Runs the built-in web server that serves phishing templates |
+| `curl` | `command -v curl` | Downloads ngrok and loclx binaries; used internally by tunnel scripts |
+| `ssh` / `openssh-server` | `command -v ssh` | Establishes Serveo and other SSH-based tunnels |
+| `unzip` | `command -v unzip` | Extracts `Modules.zip` during setup |
+
+<Tabs>
+  <Tab title="Linux">
+    The `setup` script installs packages via `apt-get`:
+
+    ```bash
+    sudo apt-get update
+    sudo apt-get install -y ssh openssh-server curl php unzip
+    ```
+  </Tab>
+  <Tab title="Termux (Android)">
+    The `tmux_setup` script installs packages via Termux's `apt`:
+
+    ```bash
+    apt update
+    apt install -y curl openssh php unzip
+    ```
+  </Tab>
+</Tabs>
+
+## Auto-downloaded binaries
+
+Ngrok and LocalXpose (loclx) are not installed system-wide. The setup script downloads architecture-specific builds and places them in `.htr/`. NexPhisher calls them by path (`.htr/ngrok`, `.htr/loclx`).
+
+### Ngrok
+
+Ngrok creates an authenticated HTTPS tunnel to the local PHP server and prints a public URL.
+
+| Architecture | Download URL |
+|--------------|--------------|
+| x86 (32-bit) | `https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-386.zip` |
+| ARM / Android | `https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.zip` |
+
+The setup script detects the CPU architecture automatically and downloads the correct variant. After extraction, the binary is placed at `.htr/ngrok`.
+
+### LocalXpose (loclx)
+
+LocalXpose provides an alternative tunnel service with optional custom subdomains.
+
+| Architecture | Download URL |
+|--------------|--------------|
+| x86 (32-bit) | `https://lxpdownloads.sgp1.digitaloceanspaces.com/cli/loclx-linux-386.zip` |
+| ARM / Android | `https://lxpdownloads.sgp1.digitaloceanspaces.com/cli/loclx-linux-arm.zip` |
+
+The binary is placed at `.htr/loclx` after extraction.
+
+<Note>
+  Both binaries must be executable. If NexPhisher reports a permission error, run `chmod +x .htr/ngrok .htr/loclx`.
+</Note>
+
+## Directories created by setup
+
+The setup script creates two directories that NexPhisher requires at runtime. If either is missing, the tool exits with a "Packages are not Found" error.
+
+| Directory | Created by | Purpose |
+|-----------|------------|---------|
+| `.htr/` | `setup` / `tmux_setup` | Stores `ngrok`, `loclx`, and the active web server files at `.htr/www/` |
+| `.Modules/` | `setup` / `tmux_setup` | Stores extracted phishing template files (one subdirectory per platform) |
+| `logs/` | `setup` / `tmux_setup` | Stores per-platform credential log files |
+
+The `.htr/www/` subdirectory is recreated fresh at the start of each session and deleted between runs.
+
+## Full directory structure after setup
+
+<Tree>
+  <Tree.Folder name="nexphisher" defaultOpen>
+    <Tree.File name="nexphisher" />
+    <Tree.File name="setup" />
+    <Tree.File name="tmux_setup" />
+    <Tree.File name="Modules.zip" />
+    <Tree.Folder name=".htr" defaultOpen>
+      <Tree.File name="ngrok" />
+      <Tree.File name="loclx" />
+      <Tree.Folder name="www">
+        <Tree.File name="index.html" />
+        <Tree.File name="ip.php" />
+        <Tree.File name="usernames.txt" />
+        <Tree.File name="ip.txt" />
+      </Tree.Folder>
+    </Tree.Folder>
+    <Tree.Folder name=".Modules" defaultOpen>
+      <Tree.Folder name="facebook" />
+      <Tree.Folder name="instagram" />
+      <Tree.Folder name="google" />
+      <Tree.File name="ip.php" />
+    </Tree.Folder>
+    <Tree.Folder name="logs">
+      <Tree.File name="facebook.log" />
+      <Tree.File name="instagram.log" />
+    </Tree.Folder>
+    <Tree.File name="ip.txt" />
+    <Tree.File name=".nexlink" />
+  </Tree.Folder>
+</Tree>
+
+<Note>
+  `.htr/www/` contents are shown as they appear during an active session. The directory is empty or absent between sessions.
+</Note>
+
+## Verifying installation
+
+After running `bash setup` (Linux) or `bash tmux_setup` (Termux), verify the installation with the following checks.
+
+<Steps>
+  <Step title="Check system packages">
+    Confirm all four tools are in PATH:
+
+    ```bash
+    command -v php && command -v curl && command -v ssh && command -v unzip
+    ```
+
+    Each line should print a path such as `/usr/bin/php`. If a command prints nothing, that package is missing.
+  </Step>
+  <Step title="Check binaries">
+    Confirm the downloaded binaries exist and are executable:
+
+    ```bash
+    ls -lh .htr/ngrok .htr/loclx
+    ```
+
+    Expected output shows both files with executable permissions (`-rwxr-xr-x` or similar).
+  </Step>
+  <Step title="Check directories">
+    Confirm the required directories were created:
+
+    ```bash
+    ls -d .htr .Modules logs
+    ```
+
+    All three directory names should be printed without errors.
+  </Step>
+  <Step title="Run the tool">
+    Start NexPhisher. If all dependencies are present, the banner appears and the main menu is displayed:
+
+    ```bash
+    bash nexphisher
+    ```
+
+    If any dependency is missing, NexPhisher prints an error and exits before showing the menu. See [Troubleshooting](/reference/troubleshooting) for specific error messages and fixes.
+  </Step>
+</Steps>

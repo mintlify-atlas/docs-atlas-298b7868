@@ -1,0 +1,243 @@
+---
+title: "Port forwarding"
+description: "All five tunnel options available in NexPhisher — what runs behind the scenes, how to get the URL, and known limitations."
+---
+
+After you select a phishing template, NexPhisher presents the tunnel menu:
+
+```text
+ [01] LocalHost
+ [02] Ngrok
+ [03] Serveo  [Currently Down]
+ [04] LocalXpose
+ [05] LocalHostRun
+```
+
+The default selection is `2` (Ngrok) — pressing Enter without typing a number uses Ngrok.
+
+<Tabs>
+  <Tab title="01 — LocalHost">
+    ## LocalHost
+
+    **When to use:** Testing on your own machine or LAN. No internet exposure.
+
+    ### What happens
+
+    NexPhisher starts PHP's built-in server bound to the loopback address on port 5555:
+
+    ```bash
+php -S 127.0.0.1:5555
+    ```
+
+    The page is immediately accessible at:
+
+    ```text
+http://127.0.0.1:5555
+    ```
+
+    ### Getting the URL
+
+    The URL is printed directly in the terminal after startup. There is no external tunnel — the URL only works from the same machine or, if you adjust your firewall, from devices on the same local network by replacing `127.0.0.1` with the host's LAN IP.
+
+    ### Custom subdomains
+
+    Not applicable. No domain is generated.
+
+    ### Limitations
+
+    - Only reachable from the local machine by default.
+    - Requires manual network configuration to reach from another device.
+    - Not usable for attacks against remote targets.
+  </Tab>
+
+  <Tab title="02 — Ngrok">
+    ## Ngrok
+
+    **When to use:** General-purpose internet exposure with a randomly assigned ngrok subdomain. No account or custom domain required for basic use.
+
+    ### What happens
+
+    NexPhisher starts PHP on port 5555, then launches the bundled ngrok binary to create an HTTP tunnel:
+
+    ```bash
+# PHP server started first
+php -S 127.0.0.1:5555
+
+# ngrok tunnel started 2 seconds later
+.htr/ngrok http 127.0.0.1:5555
+    ```
+
+    The tool waits 7 seconds for ngrok to establish the tunnel, then queries the local ngrok API to retrieve the public URL:
+
+    ```bash
+curl -s -N http://127.0.0.1:4040/api/tunnels
+    ```
+
+    The URL is extracted from the JSON response using a pattern match against `https://[-0-9a-z]*.ngrok.io`.
+
+    ### Getting the URL
+
+    The generated URL is printed in the terminal:
+
+    ```text
+ [~] Send the link to victim: https://a1b2c3d4.ngrok.io
+    ```
+
+    You can also open `http://127.0.0.1:4040` in a browser to see the ngrok dashboard and inspect requests.
+
+    ### Custom subdomains
+
+    Not supported by this integration. Ngrok assigns a random subdomain. A paid ngrok account with a reserved domain is required for custom subdomains, but the tool does not expose that option.
+
+    ### Limitations
+
+    - The ngrok binary must be present at `.htr/ngrok`. Run `bash setup` to install it.
+    - Free ngrok accounts are rate-limited and sessions expire after a few hours.
+    - The 7-second wait is hard-coded; slow connections may cause the URL extraction to fail (returning an empty string).
+  </Tab>
+
+  <Tab title="03 — Serveo">
+    ## Serveo
+
+    **When to use:** Free SSH-based reverse tunnel when no binaries are required, only SSH.
+
+    <Warning>
+      Serveo is marked **Currently Down** in the tool. The option is present but the tunnel will not function until the serveo.net service resumes. Use Ngrok, LocalXpose, or LocalHostRun as alternatives.
+    </Warning>
+
+    ### What happens
+
+    NexPhisher prompts for a local port (default `5555`) and optionally a custom subdomain. It then starts PHP on the chosen port and opens an SSH reverse tunnel:
+
+    ```bash
+# With custom subdomain
+ssh -o StrictHostKeyChecking=no \
+    -o ServerAliveInterval=60 \
+    -o ServerAliveCountMax=60 \
+    -R <subdomain>:80:localhost:<port> serveo.net
+
+# Without custom subdomain
+ssh -o StrictHostKeyChecking=no \
+    -o ServerAliveInterval=60 \
+    -R 80:localhost:<port> serveo.net
+    ```
+
+    The tunnel output is written to `.nexlink`. After 7 seconds the tool reads the URL from that file.
+
+    ### Getting the URL
+
+    The URL would be printed in the terminal:
+
+    ```text
+ [~] Send the link to victim: https://<subdomain>.serveo.net
+    ```
+
+    ### Custom subdomains
+
+    Yes — supported. When prompted with `Generate Custom Link? [Y/n]`, enter `Y` and provide a subdomain name. If you press Enter without a name, a default of `<platform><random-number>` is used (for example, `facebook14823`).
+
+    ### Limitations
+
+    - The service is currently down.
+    - Requires SSH access to external hosts, which may be blocked on some networks.
+    - The `ServerAliveCountMax=60` setting means the tunnel will close if 60 keepalives go unanswered.
+  </Tab>
+
+  <Tab title="04 — LocalXpose">
+    ## LocalXpose
+
+    **When to use:** Internet-accessible tunnel using the LocalXpose service, with optional custom subdomain.
+
+    ### What happens
+
+    NexPhisher optionally prompts for a custom subdomain, then starts PHP on port 4142 and launches the bundled `loclx` binary:
+
+    ```bash
+# PHP server
+php -S 127.0.0.1:4142
+
+# Tunnel with custom subdomain
+.htr/loclx tunnel http --to :4142 --subdomain <name>
+
+# Tunnel with auto-assigned subdomain
+.htr/loclx tunnel http --to :4142
+    ```
+
+    Tunnel output is written to `.nexlink`. After 8 seconds the tool extracts the public URL:
+
+    ```bash
+grep -o 'https://[0-9a-z]*.loclx.io ' .nexlink
+    ```
+
+    ### Getting the URL
+
+    The URL is printed in the terminal:
+
+    ```text
+ [~] Send the link to victim: https://mycustomname.loclx.io
+    ```
+
+    ### Custom subdomains
+
+    Yes — supported. When prompted with `Generate Custom Link? [Y/n]`, enter `Y` and provide a subdomain name. The default is `<platform><random-number>` (for example, `netflix9341`). Custom subdomains on LocalXpose may require a paid account depending on the service tier.
+
+    ### Limitations
+
+    - The `loclx` binary must be present at `.htr/loclx`. Run `bash setup` to install it.
+    - The 8-second wait is hard-coded; slow or congested connections may cause URL extraction to return empty.
+    - LocalXpose free tier may impose connection limits or subdomain restrictions.
+  </Tab>
+
+  <Tab title="05 — LocalHostRun">
+    ## LocalHostRun
+
+    **When to use:** Quick internet-accessible tunnel using only SSH — no additional binaries needed beyond `ssh`.
+
+    ### What happens
+
+    NexPhisher starts PHP on port 4545, then opens an SSH reverse tunnel to `ssh.localhost.run`:
+
+    ```bash
+# PHP server
+php -S 127.0.0.1:4545
+
+# SSH tunnel (blocking)
+ssh -R 80:localhost:4545 ssh.localhost.run
+    ```
+
+    <Note>
+      Unlike the other tunnel methods, LocalHostRun runs the SSH command in the foreground. The URL is printed directly by the SSH session to stdout. The credential polling loop starts **after** you press Ctrl+C to stop the SSH session.
+    </Note>
+
+    ### Getting the URL
+
+    The URL is printed to the terminal by the SSH session itself (not extracted by the script). Look for output like:
+
+    ```text
+Connect to http://abc123.localhost.run or https://abc123.localhost.run
+    ```
+
+    The tool instructs you to press **Ctrl+C** to stop the tunnel and then view the captured credentials.
+
+    ### Custom subdomains
+
+    Not supported. localhost.run assigns a random subdomain per connection.
+
+    ### Limitations
+
+    - The credential polling loop does not run while the SSH tunnel is active — it starts only after the tunnel is closed with Ctrl+C.
+    - Requires outbound SSH access on port 22.
+    - Random subdomains change on each new connection.
+    - No subdomain customization without a localhost.run paid plan (not integrated).
+  </Tab>
+</Tabs>
+
+## Comparison summary
+
+| Method | External access | Custom subdomain | Extra binary | Notes |
+|--------|----------------|-----------------|--------------|-------|
+| LocalHost | No | No | No | LAN/local only |
+| Ngrok | Yes | No | `.htr/ngrok` | Sessions time out |
+| Serveo | Yes | Yes | No (SSH only) | Currently down |
+| LocalXpose | Yes | Yes | `.htr/loclx` | Paid plan may be needed for subdomains |
+| LocalHostRun | Yes | No | No (SSH only) | Blocks until Ctrl+C; credentials viewed after tunnel ends |

@@ -1,0 +1,77 @@
+---
+title: "Introduction"
+description: "NexPhisher is an advanced phishing tool with 30+ login page templates and multiple port-forwarding options for Linux and Termux."
+---
+
+<Warning>
+  NexPhisher is intended for **authorized security testing and educational purposes only**. The author does not endorse illegal use. Misuse of this tool may violate laws in your jurisdiction.
+  
+  **Note:** This project is no longer maintained. The successor is [ZPhisher](https://github.com/htr-tech/zphisher).
+</Warning>
+
+## What is NexPhisher?
+
+NexPhisher is a Bash-based phishing framework that automates the creation and deployment of credential-harvesting pages. It replicates the login pages of 30+ major platforms and serves them via various port-forwarding services to make them accessible over the internet.
+
+The tool is designed for use on Linux systems and Android devices running Termux. It features an interactive terminal menu, real-time credential capture, and victim IP logging.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="30+ Phishing Templates" icon="browser">
+    Pre-built login page replicas for Facebook, Instagram, Google, Netflix, PayPal, Steam, Twitter, and many more.
+  </Card>
+  <Card title="5 Tunnel Options" icon="network-wired">
+    Deploy pages via Localhost, Ngrok, Serveo, LocalXpose, or LocalHostRun with optional custom subdomains.
+  </Card>
+  <Card title="Real-time Capture" icon="terminal">
+    Credentials and victim IP addresses are captured in real time and displayed directly in the terminal.
+  </Card>
+  <Card title="Cross-Platform" icon="mobile">
+    Works on Debian/Ubuntu Linux systems and Android devices running the Termux terminal emulator.
+  </Card>
+  <Card title="Custom Subdomains" icon="link">
+    Serveo and LocalXpose tunnels support custom subdomains to create more convincing phishing URLs.
+  </Card>
+  <Card title="Log Persistence" icon="file-lines">
+    All captured credentials are saved to `logs/<platform>.log` and IP addresses to `ip.txt` for review.
+  </Card>
+</CardGroup>
+
+## Supported platforms
+
+NexPhisher includes templates for the following 30 platforms:
+
+| # | Platform | # | Platform | # | Platform |
+|---|----------|---|----------|---|----------|
+| 01 | Facebook (4 variants) | 11 | Twitch | 21 | DeviantArt |
+| 02 | Instagram (3 variants) | 12 | Pinterest | 22 | Badoo |
+| 03 | Google/Gmail (3 variants) | 13 | Snapchat | 23 | Origin |
+| 04 | Microsoft | 14 | LinkedIn | 24 | CryptoCoin |
+| 05 | Netflix | 15 | eBay | 25 | Yahoo |
+| 06 | PayPal | 16 | Dropbox | 26 | WordPress |
+| 07 | Steam | 17 | ProtonMail | 27 | Yandex |
+| 08 | Twitter | 18 | Spotify | 28 | StackOverflow |
+| 09 | PlayStation | 19 | Reddit | 29 | VK (2 variants) |
+| 10 | GitHub | 20 | Adobe | 30 | XBOX |
+
+## How it works
+
+NexPhisher operates in three stages:
+
+1. **Template selection** — You choose a target platform from the interactive menu. NexPhisher copies the corresponding HTML/PHP login page template to a local web server directory.
+
+2. **Tunnel setup** — A PHP built-in web server is started locally. A tunnel service (Ngrok, Serveo, etc.) creates a public URL that forwards to the local server.
+
+3. **Credential capture** — When a victim submits the fake login form, the credentials are written to `usernames.txt` and the victim's IP is written to `ip.txt` in the server directory. NexPhisher's polling loop detects these files and displays the data in the terminal.
+
+## Get started
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install NexPhisher on Linux or Termux
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Run your first session in under 5 minutes
+  </Card>
+</CardGroup>

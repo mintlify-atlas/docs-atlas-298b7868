@@ -1,0 +1,169 @@
+---
+title: "Installation"
+description: "Install NexPhisher on Linux or Termux using the provided setup scripts."
+---
+
+<Warning>
+  **This project is no longer maintained.** For an actively maintained alternative with the same functionality, use [ZPhisher](https://github.com/htr-tech/zphisher) instead.
+</Warning>
+
+## Prerequisites
+
+Before installing NexPhisher, make sure you have the following:
+
+- **git** — to clone the repository
+- **An active internet connection** — the setup scripts download `ngrok` and `loclx` binaries during installation
+- **Root or sudo access** (Linux) — required to install packages via `apt-get`
+
+---
+
+## Installation
+
+<Tabs>
+  <Tab title="Linux">
+    <Steps>
+      <Step title="Update package lists and install git">
+        ```bash
+        apt update
+        apt install git -y
+        ```
+      </Step>
+
+      <Step title="Clone the repository">
+        ```bash
+        git clone git://github.com/htr-tech/nexphisher.git
+        cd nexphisher
+        ```
+      </Step>
+
+      <Step title="Run the setup script">
+        ```bash
+        bash setup
+        ```
+
+        The `setup` script performs the following actions:
+
+        - Installs `ssh`, `curl`, `php`, `unzip`, and `openssh-server` via `apt-get`
+        - Creates the `.htr/` and `logs/` directories inside the project folder
+        - Downloads the `ngrok` binary (x86 or ARM depending on your architecture) and places it in `.htr/`
+        - Downloads the `loclx` (LocalXpose) binary and places it in `.htr/`
+        - Sets up `~/.ssh/known_hosts` with Serveo host keys
+        - Makes the `nexphisher` script executable
+
+        <Note>
+          If `ngrok` or `loclx` cannot be downloaded automatically, the script will exit with an error. In that case, download the appropriate binary manually and place it at `.htr/ngrok` or `.htr/loclx` respectively.
+        </Note>
+      </Step>
+
+      <Step title="Verify the installation">
+        After the script completes, confirm that the required binaries and directories are in place:
+
+        ```bash
+        ls .htr/
+        # Expected output includes: ngrok  loclx
+
+        ls logs/
+        # Directory should exist (empty at this point)
+
+        php --version
+        curl --version
+        ssh -V
+        ```
+
+        If all commands return output without errors, the installation succeeded.
+      </Step>
+    </Steps>
+
+    ### Single-command install
+
+    You can run the entire installation with one command:
+
+    ```bash
+    apt update ; apt install git -y ; git clone git://github.com/htr-tech/nexphisher.git ; cd nexphisher ; bash setup ; bash nexphisher
+    ```
+
+    <Info>
+      This single command updates packages, installs git, clones the repo, runs setup, and launches NexPhisher immediately.
+    </Info>
+  </Tab>
+
+  <Tab title="Termux">
+    <Steps>
+      <Step title="Install git">
+        ```bash
+        apt update
+        apt install git -y
+        ```
+      </Step>
+
+      <Step title="Clone the repository">
+        ```bash
+        git clone git://github.com/htr-tech/nexphisher.git
+        cd nexphisher
+        ```
+      </Step>
+
+      <Step title="Run the Termux setup script">
+        ```bash
+        bash tmux_setup
+        ```
+
+        The `tmux_setup` script performs the following actions:
+
+        - Runs `apt update` and `apt upgrade`
+        - Installs `curl`, `openssh`, `php`, and `unzip` via Termux's `apt`
+        - Creates the `.htr/` and `logs/` directories inside the project folder
+        - Downloads the `ngrok` binary (ARM build for Android) and places it in `.htr/`
+        - Downloads the `loclx` (LocalXpose) binary and places it in `.htr/`
+        - Creates `~/.ssh/` if it does not exist
+        - Makes the `nexphisher` script executable
+
+        <Note>
+          Termux uses its own package manager. Do not use `sudo` — Termux runs in a user environment without root by default.
+        </Note>
+      </Step>
+
+      <Step title="Verify the installation">
+        ```bash
+        ls .htr/
+        # Expected output includes: ngrok  loclx
+
+        php --version
+        curl --version
+        ```
+
+        If both commands return output without errors, the installation succeeded.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+---
+
+## What the setup scripts install
+
+Both `setup` (Linux) and `tmux_setup` (Termux) install the same set of dependencies and binaries. The only difference is the package manager used (`apt-get` on Linux, `apt` on Termux) and the OpenSSH package name (`openssh-server` vs `openssh`).
+
+| Component | Purpose |
+|---|---|
+| `php` | Serves the phishing page locally via PHP's built-in web server |
+| `curl` | Downloads binaries during setup; used internally by the tool |
+| `ssh` / `openssh` | Required for Serveo and LocalHostRun port-forwarding methods |
+| `unzip` | Extracts downloaded zip archives |
+| `.htr/ngrok` | Ngrok binary for the Ngrok tunneling option |
+| `.htr/loclx` | LocalXpose CLI binary for the LocalXpose tunneling option |
+| `.htr/` directory | Working directory used at runtime to serve phishing pages |
+| `logs/` directory | Stores captured credential log files |
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Run NexPhisher for the first time and capture your first session.
+  </Card>
+  <Card title="Port forwarding options" icon="network-wired" href="/usage/port-forwarding">
+    Learn about the five available tunneling methods.
+  </Card>
+</CardGroup>

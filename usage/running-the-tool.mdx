@@ -1,0 +1,128 @@
+---
+title: "Running the tool"
+description: "How to launch NexPhisher, navigate the interactive menu, and interpret the credential capture loop."
+---
+
+## Launching NexPhisher
+
+Run the main script with Bash from the directory where NexPhisher is installed:
+
+```bash
+bash nexphisher
+```
+
+<Note>
+  Run `bash setup` first if you have not already installed the dependencies. NexPhisher checks for `php`, `curl`, `ssh`, and `unzip` at startup and exits immediately if any are missing.
+</Note>
+
+On launch, NexPhisher prints its ASCII banner and verifies that the `.htr/` and `.Modules/` directories are present before showing the main menu.
+
+```text
+  _   _            _____  _     _     _
+ | \ | |           |  __ \| |   (_)   | |
+ |  \| | _____  __ | |__) | |__  _ ___| |__   ___ _ __
+ | .   |/ _ \ \/ / |  ___/|  _ \| / __|  _ \ / _ \  __|
+ | |\  |  __/>  <  | |    | | | | \__ \ | | |  __/ |
+ |_| \_|\___/_/\_ \ |_|    |_| |_|_|___/_| |_|\___|_|  [V 1.0]
+
+  Advanced Phishing Tool with 30+ Templates  [BY : HTR-TECH ]
+```
+
+## Navigating the main menu
+
+The main menu lists 30 platform targets plus two special options:
+
+```text
+      [::] Select Any Attack for Your Victim  [::]
+
+ [01] Facebook     [11] Twitch       [21] DeviantArt    [99] About
+ [02] Instagram    [12] Pinterest    [22] Badoo         [00] Exit
+ [03] Google       [13] Snapchat     [23] Origin
+ [04] Microsoft    [14] Linkedin     [24] CryptoCoin
+ [05] Netflix      [15] Ebay         [25] Yahoo
+ [06] Paypal       [16] Dropbox      [26] Wordpress
+ [07] Steam        [17] Protonmail   [27] Yandex
+ [08] Twitter      [18] Spotify      [28] StackoverFlow
+ [09] Playstation  [19] Reddit       [29] Vk
+ [10] Github       [20] Adobe        [30] XBOX
+```
+
+Type the number and press **Enter**. Leading zeros are accepted (`01` and `1` are equivalent).
+
+| Input | Action |
+|-------|--------|
+| `01`–`30` | Select a phishing target platform |
+| `99` | Open the About screen |
+| `00` | Exit the tool |
+
+An invalid entry prints an error, pauses for one second, and redisplays the menu.
+
+## Full session flow
+
+<Steps>
+  <Step title="Launch the tool">
+    Run `bash nexphisher`. The banner is displayed and prerequisites are checked.
+  </Step>
+  <Step title="Select a platform">
+    Enter a number from `01` to `30`. Platforms with multiple template variants (Facebook, Instagram, Google, VK) show a secondary sub-menu before continuing.
+  </Step>
+  <Step title="Choose a port-forwarding method">
+    After the template is selected, the tunnel menu is shown with five options: LocalHost, Ngrok, Serveo, LocalXpose, and LocalHostRun. The default is option `2` (Ngrok) if you press Enter without typing a choice.
+  </Step>
+  <Step title="Copy the generated link">
+    Once the tunnel starts, the shareable URL is printed to the terminal. Send this link to the target.
+  </Step>
+  <Step title="Wait for credentials">
+    The tool enters a polling loop, checking `.htr/www/ip.txt` and `.htr/www/usernames.txt` every 0.75 seconds. When a visitor loads the page, their IP is logged immediately. When they submit the login form, the username and password are printed and appended to `logs/<platform>.log`.
+  </Step>
+</Steps>
+
+## Credential capture loop
+
+Once the tunnel is active, NexPhisher enters an infinite loop waiting for two files:
+
+| File | Contents | Action |
+|------|----------|--------|
+| `.htr/www/ip.txt` | `IP: <address>` | Prints the victim IP and appends to `ip.txt` |
+| `.htr/www/usernames.txt` | `Username: <value>\nPass: <value>` | Prints credentials and appends to `logs/<platform>.log` |
+
+Both files are deleted after being read so the loop can capture multiple visitors in sequence.
+
+Example terminal output after a victim submits credentials:
+
+```text
+ [~] Victim IP Found !
+ [~] Victim IP: 203.0.113.45
+ [~] Saved: ip.txt
+
+ [~] Login info Found !!
+ [~] Account: victim@example.com
+ [~] Password:  hunter2
+ [~] Saved: logs/facebook.log
+
+ [~] Waiting for Next Login Info, Ctrl + C to exit.
+```
+
+## Exiting and cleanup
+
+Press **Ctrl+C** at any time. The `stop()` function runs automatically via a `trap` signal handler and performs the following cleanup:
+
+- Kills any running `ngrok` processes (`pkill -f -2 ngrok`, `killall ngrok`)
+- Kills any running `php` server processes
+- Kills any running `ssh` tunnel processes
+- Removes the `.nexlink` temporary file if present
+
+After cleanup the tool prints a thank-you message and exits.
+
+```text
+ Thanks for Using This Tool !!  Visit https://github.com/htr-tech for more
+```
+
+## About screen
+
+Enter `99` at the main menu to view the About screen. It displays the tool version, author name (Tahmid Rayat / HTR-TECH), GitHub URL, and Instagram handle. After a 3-second pause, two navigation options appear:
+
+| Input | Action |
+|-------|--------|
+| `00` | Return to the main menu |
+| `99` | Exit the tool |

@@ -1,0 +1,214 @@
+---
+title: "Phishing templates"
+description: "All 30 platform templates included with NexPhisher, including multi-variant platforms and how templates are served."
+---
+
+## How templates work
+
+Each template is a self-contained PHP-based fake login page stored in a subdirectory under `.Modules/`:
+
+```text
+.Modules/
+├── facebook/
+├── fb_advanced/
+├── fb_security/
+├── fb_messenger/
+├── instagram/
+├── ig_followers/
+├── ig_verify/
+├── google/
+├── google_new/
+├── google_poll/
+├── vk/
+├── vk_poll/
+├── microsoft/
+├── netflix/
+...
+├── ip.php          ← shared IP capture script
+```
+
+When you select a template, NexPhisher copies the chosen module directory into `.htr/www/` and also copies `.Modules/ip.php` into that directory. PHP's built-in server then serves these files. The `ip.php` script records the visitor's IP address to `.htr/www/ip.txt` when the page loads, and the login form posts credentials to `.htr/www/usernames.txt`.
+
+<Info>
+  The `.htr/www/` directory is wiped and recreated each time you select a new template, so only one template is active at a time.
+</Info>
+
+## Full template list
+
+The table below shows all 30 menu options and their corresponding internal template IDs (the directory name under `.Modules/`).
+
+| # | Platform | Internal ID(s) |
+|---|----------|----------------|
+| 01 | Facebook | See sub-menu |
+| 02 | Instagram | See sub-menu |
+| 03 | Google | See sub-menu |
+| 04 | Microsoft | `microsoft` |
+| 05 | Netflix | `netflix` |
+| 06 | Paypal | `paypal` |
+| 07 | Steam | `steam` |
+| 08 | Twitter | `twitter` |
+| 09 | Playstation | `playstation` |
+| 10 | Github | `github` |
+| 11 | Twitch | `twitch` |
+| 12 | Pinterest | `pinterest` |
+| 13 | Snapchat | `snapchat` |
+| 14 | Linkedin | `linkedin` |
+| 15 | Ebay | `ebay` |
+| 16 | Dropbox | `dropbox` |
+| 17 | Protonmail | `protonmail` |
+| 18 | Spotify | `spotify` |
+| 19 | Reddit | `reddit` |
+| 20 | Adobe | `adobe` |
+| 21 | DeviantArt | `deviantart` |
+| 22 | Badoo | `badoo` |
+| 23 | Origin | `origin` |
+| 24 | CryptoCoin | `cryptocoinsniper` |
+| 25 | Yahoo | `yahoo` |
+| 26 | Wordpress | `wordpress` |
+| 27 | Yandex | `yandex` |
+| 28 | StackoverFlow | `stackoverflow` |
+| 29 | VK | See sub-menu |
+| 30 | XBOX | `xbox` |
+
+## Multi-variant platforms
+
+Four platforms offer a secondary sub-menu so you can choose between different lure styles before the tunnel menu appears.
+
+<AccordionGroup>
+  <Accordion title="Facebook — 4 variants" icon="facebook">
+    Enter `01` at the main menu to reach the Facebook sub-menu:
+
+    ```text
+     [01] Traditional Login Page
+     [02] Advanced Voting Poll Login Page
+     [03] Fake Security Login Page
+     [04] Facebook Messenger Login Page
+    ```
+
+    | Option | Internal ID | Description |
+    |--------|-------------|-------------|
+    | 01 | `facebook` | Standard Facebook login page replica |
+    | 02 | `fb_advanced` | Login page embedded inside a fake voting poll |
+    | 03 | `fb_security` | Page posing as a Facebook security alert requiring re-authentication |
+    | 04 | `fb_messenger` | Messenger-branded login page |
+  </Accordion>
+
+  <Accordion title="Instagram — 3 variants" icon="instagram">
+    Enter `02` at the main menu to reach the Instagram sub-menu:
+
+    ```text
+     [01] Traditional Login Page
+     [02] Auto Followers Login Page
+     [03] Blue Badge Verify Login Page
+    ```
+
+    | Option | Internal ID | Description |
+    |--------|-------------|-------------|
+    | 01 | `instagram` | Standard Instagram login page replica |
+    | 02 | `ig_followers` | Page promising automatic follower growth, requiring login |
+    | 03 | `ig_verify` | Page posing as the Instagram blue badge verification flow |
+  </Accordion>
+
+  <Accordion title="Google — 3 variants" icon="google">
+    Enter `03` at the main menu to reach the Google/Gmail sub-menu:
+
+    ```text
+     [01] Gmail Old Login Page
+     [02] Gmail New Login Page
+     [03] Advanced Voting Poll
+    ```
+
+    | Option | Internal ID | Description |
+    |--------|-------------|-------------|
+    | 01 | `google` | Classic (older-style) Google sign-in page |
+    | 02 | `google_new` | Current Google sign-in page design |
+    | 03 | `google_poll` | Login page embedded inside a fake Google voting poll |
+  </Accordion>
+
+  <Accordion title="VK — 2 variants" icon="vk">
+    Enter `29` at the main menu to reach the VK sub-menu:
+
+    ```text
+     [01] Traditional Login Page
+     [02] Advanced Voting Poll Login Page
+    ```
+
+    | Option | Internal ID | Description |
+    |--------|-------------|-------------|
+    | 01 | `vk` | Standard VK login page replica |
+    | 02 | `vk_poll` | Login page embedded inside a fake VK voting poll |
+  </Accordion>
+</AccordionGroup>
+
+## Single-variant platforms
+
+All remaining platforms (options 04–28 and 30) go directly to the tunnel menu without a sub-menu. Each maps to a single `.Modules/` directory:
+
+<AccordionGroup>
+  <Accordion title="Microsoft, Netflix, Paypal, Steam, Twitter">
+    | Platform | Internal ID |
+    |----------|-------------|
+    | Microsoft | `microsoft` |
+    | Netflix | `netflix` |
+    | Paypal | `paypal` |
+    | Steam | `steam` |
+    | Twitter | `twitter` |
+  </Accordion>
+
+  <Accordion title="Playstation, Github, Twitch, Pinterest, Snapchat">
+    | Platform | Internal ID |
+    |----------|-------------|
+    | Playstation | `playstation` |
+    | Github | `github` |
+    | Twitch | `twitch` |
+    | Pinterest | `pinterest` |
+    | Snapchat | `snapchat` |
+  </Accordion>
+
+  <Accordion title="Linkedin, Ebay, Dropbox, Protonmail, Spotify">
+    | Platform | Internal ID |
+    |----------|-------------|
+    | Linkedin | `linkedin` |
+    | Ebay | `ebay` |
+    | Dropbox | `dropbox` |
+    | Protonmail | `protonmail` |
+    | Spotify | `spotify` |
+  </Accordion>
+
+  <Accordion title="Reddit, Adobe, DeviantArt, Badoo, Origin">
+    | Platform | Internal ID |
+    |----------|-------------|
+    | Reddit | `reddit` |
+    | Adobe | `adobe` |
+    | DeviantArt | `deviantart` |
+    | Badoo | `badoo` |
+    | Origin | `origin` |
+  </Accordion>
+
+  <Accordion title="CryptoCoin, Yahoo, Wordpress, Yandex, StackoverFlow, XBOX">
+    | Platform | Internal ID |
+    |----------|-------------|
+    | CryptoCoin | `cryptocoinsniper` |
+    | Yahoo | `yahoo` |
+    | Wordpress | `wordpress` |
+    | Yandex | `yandex` |
+    | StackoverFlow | `stackoverflow` |
+    | XBOX | `xbox` |
+  </Accordion>
+</AccordionGroup>
+
+## Template serving details
+
+Once a template is selected and a tunnel method chosen, NexPhisher:
+
+1. Copies `.Modules/<template-id>/*` into `.htr/www/`
+2. Copies `.Modules/ip.php` into `.htr/www/`
+3. Starts PHP's built-in server on the configured local port
+4. Exposes the local port via the chosen tunnel
+
+Captured data is written by the PHP pages into two files in `.htr/www/`:
+
+- `ip.txt` — victim IP address in the format `IP: <address>`
+- `usernames.txt` — submitted credentials in the format `Username: <value>\nPass: <value>`
+
+Both files are appended to persistent logs and then deleted so the next submission is captured cleanly. Credentials are saved to `logs/<template-id>.log`.
